@@ -29,7 +29,10 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -96,7 +99,11 @@ public class MainActivity extends AppCompatActivity {
                 News news = newsList.get(position);
 
                 viewHolder.titleTextView.setText(news.getTitle());
-                viewHolder.descriptionTextView.setText(news.getDescription());
+                viewHolder.sourceTextView.setText(news.getUrl().split("/")[2]);
+
+                SimpleDateFormat outputFormatter = new SimpleDateFormat("dd/MM/yyyy");
+                String newsDate = outputFormatter.format(news.getDate());
+                viewHolder.dateTextView.setText(newsDate);
 
                 return convertView;
             }
@@ -163,6 +170,11 @@ public class MainActivity extends AppCompatActivity {
                             if (inItemTag) {
                                 newsObject.setDescription(parser.nextText());
                             }
+                        } else if (parser.getName().equalsIgnoreCase("pubDate")) {
+                            if (inItemTag) {
+                                SimpleDateFormat inputFormatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss");
+                                newsObject.setDate(inputFormatter.parse(parser.nextText()));
+                            }
                         }
                     } else if (eventType == XmlPullParser.END_TAG && parser.getName().equalsIgnoreCase("item")) {
                         inItemTag = false;
@@ -176,6 +188,8 @@ public class MainActivity extends AppCompatActivity {
                 exception = e;
             } catch (IOException e) {
                 exception = e;
+            } catch (ParseException e) {
+                e.printStackTrace();
             }
 
 
@@ -198,11 +212,13 @@ public class MainActivity extends AppCompatActivity {
 
     private class ViewHolder {
         private TextView titleTextView;
-        private TextView descriptionTextView;
+        private TextView sourceTextView;
+        private TextView dateTextView;
 
         public ViewHolder (View convertView) {
-            titleTextView = convertView.findViewById(R.id.newsTitle);
-            descriptionTextView = convertView.findViewById(R.id.newsDescription);
+            titleTextView = convertView.findViewById(R.id.titleTextView);
+            sourceTextView = convertView.findViewById(R.id.sourceTextView);
+            dateTextView = convertView.findViewById(R.id.dateTextView);
         }
     }
 
