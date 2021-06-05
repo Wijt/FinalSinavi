@@ -6,14 +6,31 @@
     android:layout_height="match_parent"
     tools:context=".DetailActivity">
 
+    <TextView
+        android:id="@+id/detailTitle"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"
+        android:text="NEWS DETAIL"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/detailWebView"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_weight="0.05"/>
+
     <WebView
         android:id="@+id/detailWebView"
+        app:layout_constraintVertical_weight="0.95"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/detailTitle" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
