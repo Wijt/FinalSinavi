@@ -3,17 +3,21 @@ package com.example.final_exam;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView newsListView;
     private BaseAdapter listAdapter;
-    private List<News> newsList;
+    private ArrayList<News> newsList;
 
     private Button detailButton;
     private Button permissionButton;
@@ -63,51 +67,37 @@ public class MainActivity extends AppCompatActivity {
 
         new RSSFetchAsyncTask().execute("https://www.aa.com.tr/tr/rss/default?cat=turkiye");
 
+        EditText inputBox = findViewById(R.id.editText);
+        inputBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String filterKey = charSequence.toString().toLowerCase();
+                ArrayList<News> filtered = new ArrayList<>();
+                for(int p = 0; p < newsList.size(); p++){
+                    String title = newsList.get(p).getTitle().toLowerCase();
+                    if (title.contains(filterKey)) {
+                        filtered.add(newsList.get(p));
+                    }
+                }
+                MyAdapter filteredAdapter = new MyAdapter(getApplicationContext(), filtered);
+                newsListView.setAdapter(filteredAdapter);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
     private void initViews() {
         newsListView = findViewById(R.id.newsListView);
-        listAdapter = new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return newsList.size();
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return newsList.get(position);
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-
-                ViewHolder viewHolder;
-
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(MainActivity.this).inflate(R.layout.layout_listview_item, parent, false);
-                    viewHolder = new ViewHolder(convertView);
-                    convertView.setTag(viewHolder);
-                } else {
-                    viewHolder = (ViewHolder) convertView.getTag();
-                }
-
-                News news = newsList.get(position);
-
-                viewHolder.titleTextView.setText(news.getTitle());
-                viewHolder.sourceTextView.setText(news.getUrl().split("/")[2]);
-
-                SimpleDateFormat outputFormatter = new SimpleDateFormat("dd/MM/yyyy");
-                String newsDate = outputFormatter.format(news.getDate());
-                viewHolder.dateTextView.setText(newsDate);
-
-                return convertView;
-            }
-        };
+        listAdapter = new MyAdapter(getApplicationContext(), newsList);
         newsListView.setAdapter(listAdapter);
 
         newsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -210,17 +200,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private class ViewHolder {
-        private TextView titleTextView;
-        private TextView sourceTextView;
-        private TextView dateTextView;
 
-        public ViewHolder (View convertView) {
-            titleTextView = convertView.findViewById(R.id.titleTextView);
-            sourceTextView = convertView.findViewById(R.id.sourceTextView);
-            dateTextView = convertView.findViewById(R.id.dateTextView);
-        }
-    }
 
 
     private void initButtons() {
@@ -282,6 +262,65 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "You should give us this permission to use application.", Toast.LENGTH_SHORT).show();
                 }
             }
+        }
+    }
+}
+
+
+class MyAdapter extends BaseAdapter {
+    ArrayList<News> _list;
+    Context con;
+    MyAdapter(Context _context, ArrayList<News> news){
+        _list = news;
+        con=_context;
+    }
+    @Override
+    public int getCount() {
+        return _list.size();
+    }
+
+    @Override
+    public Object getItem(int i) {
+        return i;
+    }
+
+    @Override
+    public long getItemId(int i) {
+        return i;
+    }
+
+    @Override
+    public View getView(int i, View convertView, ViewGroup parent) {
+        ViewHolder viewHolder;
+        if (convertView==null){
+            convertView = LayoutInflater.from(con).inflate(R.layout.layout_listview_item,parent,false);
+            viewHolder = new ViewHolder(convertView);
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
+
+        News news = _list.get(i);
+
+        viewHolder.titleTextView.setText(news.getTitle());
+        viewHolder.sourceTextView.setText(news.getUrl().split("/")[2]);
+
+        SimpleDateFormat outputFormatter = new SimpleDateFormat("dd/MM/yyyy");
+        String newsDate = outputFormatter.format(news.getDate());
+        viewHolder.dateTextView.setText(newsDate);
+
+        return convertView;
+    }
+
+    private class ViewHolder {
+        private TextView titleTextView;
+        private TextView sourceTextView;
+        private TextView dateTextView;
+
+        public ViewHolder (View convertView) {
+            titleTextView = convertView.findViewById(R.id.titleTextView);
+            sourceTextView = convertView.findViewById(R.id.sourceTextView);
+            dateTextView = convertView.findViewById(R.id.dateTextView);
         }
     }
 }
